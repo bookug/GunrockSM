@@ -1,22 +1,32 @@
-VF2
+# GpSM
 
-WARN: vf2算法的第五个剪枝条件只适用于induced subgraph matching
-查询图里两点没边，在数据图的匹配中对应的两点也不能有边，这样第五个剪枝条件（二步邻居约束）才能成立。
-可看《子图匹配三十年》，一个各种子图匹配算法的综述。
-./run data.graph query.graph
-查询结果默认在ans.txt中
+implementation of ideas by Leyuan Wang to solve subgraph isomorphism problem on GPU, using Gunrock framework.
 
-NOTICE:just compared with vflib2, ./run data query output
-place all query graphs in memory and read data graph one by one
-the maxium node num in data graphs are 213
-the maxium node num in query graphs are indicated by the file name
+---
 
-is the data graph undirected? I think so, because all edge from smaller id to larger id
-if directed, then no circle at all, impossible!
-Viewed as directed and add each edge twice
+#### Dataset
 
-compare with vflib and naughty, the latter is called the fastest, using auto-morphism groups(canonical ordering) to speed up
-vflib2中要求节点个数不能超过65535，而且它的子图同构是指最标准的格式，而非子图包含，即要求边是相互对应的
-Another way is to build a graph library considering the common subgraphs of all data graphs, to reduce redundent matching with query graphs
+注意：所有数据集的节点编号都必须从0开始，所有标签必须从1开始，
+否则会有问题
 
+we target at a one-to-one mapping at a time, the query graph is small(vertices less than 100), while the data graph can be very large.
+(but can be placed in GPU's global memory)
+
+目前的子图同构采用的是普通的子图的形式，而不是导出子图的形式(induced subgraph)
+
+---
+
+#### Paper 
+
+Fast Parallel Subgraph Matching on the GPU, HPDC 2016 (CCF B poster)
+
+---
+
+#### Algorithm
+
+Due to the hardness of Gunrock framework, we do not adopt it directly but imitate its operators by ourselves.
+
+filter and verify framework(using enumeration)
+
+edge as the basic unit
 
