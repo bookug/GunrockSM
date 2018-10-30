@@ -77,10 +77,10 @@ main(int argc, const char * argv[])
 		{
 			break;
 		}
+        long af = Util::get_cur_time();
 		for(i = 0; i < qnum; ++i)
 		{
 //			float elapsed_time = 0.0f;
-			long af = Util::get_cur_time();
 			Match m(query_list[i], data_graph);
 			printf("the match class build done\n");
 			io.output(i);
@@ -97,9 +97,10 @@ main(int argc, const char * argv[])
 	//		printf("the match process use %f ms\n\n\n",af-bf);
 			io.output();
 			io.flush();
-			long bf = Util::get_cur_time();
-			cerr<<"the match process use "<<bf - af<<" ms."<<endl;
 		}
+        long bf = Util::get_cur_time();
+        cerr<<"the match process use "<<bf - af<<" ms."<<endl;
+
 		delete data_graph;
 	}
 
