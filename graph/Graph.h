@@ -22,7 +22,7 @@ public:
 		vid = -1;
 		elb = -1;
 	}
-	Neighbor(int _vid, int _elb)
+	Neighbor(long _vid, long _elb)
 	{
 		vid = _vid;
 		elb = _elb;
@@ -50,28 +50,28 @@ class Graph
 {
 public:
 	std::vector<Vertex> vertices;
-	int* labels;
+	long* labels;
 
-	int nodeSize;
-	int edgeSize;
-	int nodeLabelNum;
-	int edgeLabelNum;
+	long nodeSize;
+	long edgeSize;
+	long nodeLabelNum;
+	long edgeLabelNum;
 
-	int totalInNum;
-	int totalOutNum;
+	long totalInNum;
+	long totalOutNum;
 
-	int* inRowOffset;//行偏移
-	int* inColOffset;//列偏移，也就是邻接点的vid
-	int* inValues;//values，也就是边的labels
+	long* inRowOffset;//行偏移
+	long* inColOffset;//列偏移，也就是邻接点的vid
+	long* inValues;//values，也就是边的labels
 
-	int* outRowOffset;
-	int* outColOffset;
-	int* outValues;
+	long* outRowOffset;
+	long* outColOffset;
+	long* outValues;
 
-	int* reverseLabel;
-	int* reverseValues;
+	long* reverseLabel;
+	long* reverseValues;
 
-	int* diffLabelNum;//in fact diffLabelSum
+	long* diffLabelNum;//in fact diffLabelSum
 
 	Graph() { }
 	~Graph() {
@@ -89,7 +89,7 @@ public:
 
 		delete [] diffLabelNum;
 	}
-	int vSize() const
+	long vSize() const
 	{
 		return vertices.size();
 	}

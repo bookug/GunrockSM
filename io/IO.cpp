@@ -46,7 +46,7 @@ Graph*
 IO::input(FILE* fp)
 {
 	char c1, c2;
-	int id0, id1, id2, lb;
+	long id0, id1, id2, lb;
 	bool flag = false;
 	Graph* ng = NULL;
 
@@ -64,7 +64,7 @@ IO::input(FILE* fp)
 				return ng;
 			}
 			flag = true;
-			fscanf(fp, " %c %d\n", &c2, &id0);
+			fscanf(fp, " %c %ld\n", &c2, &id0);
 			if(id0 == -1)
 			{
 				return NULL;
@@ -72,20 +72,20 @@ IO::input(FILE* fp)
 			else
 			{
 				ng = new Graph;
-				fscanf(fp, "%d %d %d %d\n", &(ng->nodeSize),&(ng->edgeSize),&(ng->nodeLabelNum), &(ng->edgeLabelNum));
-				ng->diffLabelNum = new int [ng->nodeLabelNum];
-				memset(ng->diffLabelNum,0,sizeof(int)*(ng->nodeLabelNum));
+				fscanf(fp, "%ld %ld %ld %ld\n", &(ng->nodeSize),&(ng->edgeSize),&(ng->nodeLabelNum), &(ng->edgeLabelNum));
+				ng->diffLabelNum = new long [ng->nodeLabelNum];
+				memset(ng->diffLabelNum,0,sizeof(long)*(ng->nodeLabelNum));
 			}
 		}
 		else if(c1 == 'v')
 		{
-			fscanf(fp, " %d %d\n", &id1, &lb);
+			fscanf(fp, " %ld %ld\n", &id1, &lb);
 			ng->diffLabelNum[lb-1]++;
 			ng->addVertex(lb); 
 		}
 		else if(c1 == 'e')
 		{
-			fscanf(fp, " %d %d %d\n", &id1, &id2, &lb);
+			fscanf(fp, " %ld %ld %ld\n", &id1, &id2, &lb);
 			//NOTICE:we treat this graph as directed, each edge represents two
 			//This may cause too many matchings, if to reduce, only add the first one
 			ng->addEdge(id1, id2, lb);
@@ -126,9 +126,9 @@ IO::input(vector<Graph*>& query_list)
 }
 
 bool 
-IO::output(int qid)
+IO::output(long qid)
 {
-	fprintf(ofp, "query graph:%d    data graph:%d\n", qid, this->data_id);
+	fprintf(ofp, "query graph:%ld    data graph:%ld\n", qid, this->data_id);
 	fprintf(ofp, "%s\n", line.c_str());
 	return true;
 }
@@ -141,11 +141,11 @@ IO::output()
 }
 
 bool 
-IO::output(int* m, int size)
+IO::output(long* m, long size)
 {
-	for(int i = 0; i < size; ++i)
+	for(long i = 0; i < size; ++i)
 	{
-		fprintf(ofp, "(%d, %d) ", i, m[i]);
+		fprintf(ofp, "(%ld, %ld) ", i, m[i]);
 	}
 	fprintf(ofp, "\n");
 	return true;

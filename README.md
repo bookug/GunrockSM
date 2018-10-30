@@ -30,3 +30,19 @@ filter and verify framework(using enumeration)
 
 edge as the basic unit
 
+a little different from the original algorithm in the paper:
+1. not advance from each row to form a big array due to the limit of GPU memory
+2. not use intersections of two big sorted lists on the host side
+3. not use atomic operations to add a new answer to the result list, which is costly and hard to implement(using atomic CAS?)
+
+---
+
+#### TODO
+
+no need to count effect bits on CPU, on GPU it is faster
+
+no need to use a long type for each flag, just a bit is ok
+
+when running watdiv1M with triangle query, GunrockSM fails. 
+We need to implement the ideas above to see whether it works or not then.
+

@@ -1,10 +1,11 @@
 /*=============================================================================
-# Filename: Match.h
-# Author: Bookug Lobert 
-# Mail: 1181955272@qq.com
-# Last Modified: 2016-10-24 22:55
-# Description: find all subgraph-graph mappings between query graph and data graph
+# Filename: Match.cuh
+# Author: bookug 
+# Mail: bookug@qq.com
+# Last Modified: 2018-10-29 20:52
+# Description: 
 =============================================================================*/
+
 
 #ifndef _MATCH_MATCH_H
 #define _MATCH_MATCH_H
@@ -19,43 +20,43 @@ class d_Match
 {
 public:
 
-	int qsize, dsize;
+	long qsize, dsize;
 	
 	Graph* query;
 	Graph* data;
 
-	int** nodeCans;
-        int* nodeCansSize;
-        int** edgeCans;
-        int* edgeCansSize;
+	long** nodeCans;
+        long* nodeCansSize;
+        long** edgeCans;
+        long* edgeCansSize;
 
 	
 //WARNING: all the above variable are not avaliable on GPU!!!!!
 	
-	int* qlabels;
-	int qTotalInNum;
-	int qTotalOutNum;
+	long* qlabels;
+	long qTotalInNum;
+	long qTotalOutNum;
 
-	int* qInRowOffset;
-	int* qInColOffset;
-	int* qInValues;
+	long* qInRowOffset;
+	long* qInColOffset;
+	long* qInValues;
 
-	int* qOutRowOffset;
-	int* qOutColOffset;
-	int* qOutValues;
+	long* qOutRowOffset;
+	long* qOutColOffset;
+	long* qOutValues;
 
 
-	int* dlabels;
-	int dTotalInNum;
-	int dTotalOutNum;
+	long* dlabels;
+	long dTotalInNum;
+	long dTotalOutNum;
 	
-	int* dInRowOffset;
-	int* dInColOffset;
-	int* dInValues;
+	long* dInRowOffset;
+	long* dInColOffset;
+	long* dInValues;
 
-	int* dOutRowOffset;
-	int* dOutColOffset;
-	int* dOutValues;
+	long* dOutRowOffset;
+	long* dOutColOffset;
+	long* dOutValues;
 		
 };
 
@@ -68,40 +69,40 @@ public:
 
 private:
 
-	int qsize, dsize;
+	long qsize, dsize;
 	Graph* query;
 	Graph* data;
 
-	int** nodeCans;
-	int* nodeCansSize;
-	int** edgeCans;
-	int* edgeCansSize; 
+	long** nodeCans;
+	long* nodeCansSize;
+	long** edgeCans;
+	long* edgeCansSize; 
 
 //structures for d_Match
-	int* qlabels;
-	int qTotalInNum;
-	int qTotalOutNum;
+	long* qlabels;
+	long qTotalInNum;
+	long qTotalOutNum;
 
-	int* qInRowOffset;
-	int* qInColOffset;
-	int* qInValues;
+	long* qInRowOffset;
+	long* qInColOffset;
+	long* qInValues;
 
-	int* qOutRowOffset;
-	int* qOutColOffset;
-	int* qOutValues;
+	long* qOutRowOffset;
+	long* qOutColOffset;
+	long* qOutValues;
 
 
-	int* dlabels;
-	int dTotalInNum;
-	int dTotalOutNum;
+	long* dlabels;
+	long dTotalInNum;
+	long dTotalOutNum;
 	
-	int* dInRowOffset;
-	int* dInColOffset;
-	int* dInValues;
+	long* dInRowOffset;
+	long* dInColOffset;
+	long* dInValues;
 
-	int* dOutRowOffset;
-	int* dOutColOffset;
-	int* dOutValues;
+	long* dOutRowOffset;
+	long* dOutColOffset;
+	long* dOutValues;
 
 };
 

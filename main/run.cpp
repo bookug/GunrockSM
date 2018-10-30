@@ -79,7 +79,8 @@ main(int argc, const char * argv[])
 		}
 		for(i = 0; i < qnum; ++i)
 		{
-			float elapsed_time = 0.0f;
+//			float elapsed_time = 0.0f;
+			long af = Util::get_cur_time();
 			Match m(query_list[i], data_graph);
 			printf("the match class build done\n");
 			io.output(i);
@@ -87,18 +88,17 @@ main(int argc, const char * argv[])
 		//	cudaEventCreate(&start);
 		//	cudaEventCreate(&stop);
 		//	cudaEventRecord(start,0);
-			long bf = Util::get_cur_time();
 			m.match(io);
-			long af = Util::get_cur_time();
 		//	cudaEventRecord(stop,0);
 		//	cudaEventSynchronize(start);
 		//	cudaEventSynchronize(stop);
 		//	cudaEventElapsedTime(&elapsed_time, start, stop);
-			cerr<<"the match process use "<<af - bf<<" ms."<<endl;
 		//
 	//		printf("the match process use %f ms\n\n\n",af-bf);
 			io.output();
 			io.flush();
+			long bf = Util::get_cur_time();
+			cerr<<"the match process use "<<bf - af<<" ms."<<endl;
 		}
 		delete data_graph;
 	}

@@ -20,9 +20,9 @@ public:
 	bool input(std::vector<Graph*>& query_list);
 	bool input(Graph*& data_graph);
 	Graph* input(FILE* fp);
-	bool output(int qid);
+	bool output(long qid);
 	bool output();
-	bool output(int* m, int size);
+	bool output(long* m, long size);
 	void flush();
 	~IO();
 private:
