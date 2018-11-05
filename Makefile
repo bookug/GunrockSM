@@ -2,10 +2,10 @@
 
 CC = g++
 NVCC = nvcc -arch=sm_35 -lcudadevrt -rdc=true -G --ptxas-options=-v 
-#CFLAGS = -c -Wall -O6 #-fprofile-arcs -ftest-coverage -coverage #-pg
-#EXEFLAG = -O6 #-fprofile-arcs -ftest-coverage -coverage #-pg #-O2
-CFLAGS = -c -Wall -g #-fprofile-arcs -ftest-coverage -coverage #-pg
-EXEFLAG = -g #-fprofile-arcs -ftest-coverage -coverage #-pg #-O2
+CFLAGS = -c -Wall -O2 #-fprofile-arcs -ftest-coverage -coverage #-pg
+EXEFLAG = -O2 #-fprofile-arcs -ftest-coverage -coverage #-pg #-O2
+#CFLAGS = -c -Wall -g #-fprofile-arcs -ftest-coverage -coverage #-pg
+#EXEFLAG = -g #-fprofile-arcs -ftest-coverage -coverage #-pg #-O2
 	 
 #add -lreadline -ltermcap if using readline or objs contain readline
 library = -lcudadevrt  #-lgcov -coverage
@@ -13,10 +13,10 @@ library = -lcudadevrt  #-lgcov -coverage
 objdir = ./objs/
 objfile = $(objdir)Util.o $(objdir)IO.o $(objdir)Match.o $(objdir)Graph.o
 
-all: run.exe
+all: GunrockSM.exe
 
-run.exe: main/run.cpp $(objfile)
-	$(NVCC) $(EXEFLAG)  -o run.exe main/run.cpp $(objfile) $(library)
+GunrockSM.exe: main/run.cpp $(objfile)
+	$(NVCC) $(EXEFLAG)  -o GunrockSM.exe main/run.cpp $(objfile) $(library)
 
 $(objdir)Util.o: util/Util.cpp util/Util.h
 	$(CC) $(CFLAGS)  util/Util.cpp -o $(objdir)Util.o

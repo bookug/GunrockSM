@@ -97,3 +97,6 @@ run.exe
 # data
 data/iGraph
 
+*.log
+*.tmp
+

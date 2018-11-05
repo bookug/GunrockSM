@@ -23,17 +23,22 @@ main(int argc, const char * argv[])
 	int i, j, k;
 
 	string output = "ans.txt";
-	if(argc > 4 || argc < 3)
+	if(argc > 5 || argc < 3)
 	{
 		cerr<<"invalid arguments!"<<endl;
 		return -1;
 	}
 	string data = argv[1];
 	string query = argv[2];
-	if(argc == 4)
+	if(argc >= 4)
 	{
 		output = argv[3];
 	}
+    int dev = 0;
+    if(argc == 5)
+    {
+        dev = atoi(argv[4]);
+    }
 
 	cerr<<"args all got!"<<endl;
 	
@@ -43,7 +48,6 @@ main(int argc, const char * argv[])
             fprintf(stderr, "error: no devices supporting CUDA.\n");
             exit(EXIT_FAILURE);
         }
-        int dev = 1;
         cudaSetDevice(dev);
 
         cudaDeviceProp devProps;
@@ -99,7 +103,7 @@ main(int argc, const char * argv[])
 			io.flush();
 		}
         long bf = Util::get_cur_time();
-        cerr<<"the match process use "<<bf - af<<" ms."<<endl;
+        cerr<<"match used "<<bf - af<<" ms"<<endl;
 
 		delete data_graph;
 	}
