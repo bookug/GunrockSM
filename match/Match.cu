@@ -247,7 +247,7 @@ __global__ void edgeMerge1(long * flagArray,
         long qid2,
         long totalThreadNum,
         long qsize,
-        long * effectBit)
+        int * effectBit)
 {
     long idx = blockIdx.x*blockDim.x + threadIdx.x;
     if(idx >= totalThreadNum)
@@ -421,6 +421,22 @@ __global__ void edgeMerge2(long* d_edgeCansOff,
     }
     return ;
 }*/
+__global__ void getValidPos(int *d_effectBit,long *d_effectPos,long processedNum,int curThread) {
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx >= curThread)
+		return;
+	idx += processedNum;
+	if (idx == 0) {
+		if (d_effectBit[idx] == 1)
+			d_effectPos[idx] = 0;
+	} else {
+		if (d_effectBit[idx] != d_effectBit[idx-1]) {
+			d_effectPos[d_effectBit[idx]-1] = idx;
+		}
+	}
+	return ;
+}
+
     void 
 Match::match(IO& io)
 {
@@ -555,25 +571,25 @@ Match::match(IO& io)
     cudaFree(dOutRowOffset);
 
 
-    /*	
-        long tempCount = 0;
-        for(long i = 0; i < qsize; i++)
-        {
-        for(long j = query->inRowOffset[i]; j < query->inRowOffset[i+1]; j ++)
-        {
-        printf("here is the egde can of %ld-->%ld:\n",query->inColOffset[j],i);
-        for(long k = 0; k < edgeCansSize[tempCount]; k ++)
-        printf("cans for %ld-->%ld  :  %ld-->%ld\n",query->inColOffset[j],i,edgeCans[tempCount][2*k+1],edgeCans[tempCount][2*k]);
-        tempCount++;
-        }
-        }
-     */			
+    	
+	/*long tempCount = 0;
+	for(long i = 0; i < qsize; i++)
+	{
+			for(long j = query->inRowOffset[i]; j < query->inRowOffset[i+1]; j ++)
+			{
+					printf("here is the egde can of %ld-->%ld:\n",query->inColOffset[j],i);
+					for(long k = 0; k < edgeCansSize[tempCount]; k ++)
+							printf("cans for %ld-->%ld  :  %ld-->%ld\n",query->inColOffset[j],i,edgeCans[tempCount][2*k+1],edgeCans[tempCount][2*k]);
+					tempCount++;
+			}
+	}*/
+     			
     //find final ans	
     edgeCount = 0;
     long midResultNum = 1;
     long* d_flagArray;
     long* d_ansArea;
-    long effectiveSize = 0;
+    int effectSize = 0;
     for(long i = 0; i < qsize; i++)
     {
         for(long j = query->inRowOffset[i]; j < query->inRowOffset[i+1]; j ++)
@@ -583,18 +599,20 @@ Match::match(IO& io)
                 cudaMalloc(&d_flagArray, sizeof(long)*qsize*edgeCansSize[0]);
                 cudaMemset(d_flagArray, -1, sizeof(long)*qsize*edgeCansSize[0]);
             }
+			cout << "edgeCansSize[ " << edgeCount << "] is " << edgeCansSize[edgeCount] << endl;
             long totalThreadNum = midResultNum * edgeCansSize[edgeCount];
             printf("the totalNum is %ld\n",totalThreadNum);
+			if (totalThreadNum == 0) {
+				cout << "empty result! " << endl;
+				return ;
+			}
             /*long* effectBit =  new long[totalThreadNum];*/
-            long* effectBit =  new long[totalThreadNum/BITS];
-            long* d_effectBit;
+            int* d_effectBit;
             long* d_edgeCans;
             cudaMalloc(&d_edgeCans, sizeof(long)*edgeCansSize[edgeCount]*2);
             cudaMemcpy((void *)d_edgeCans, (void *)edgeCans[edgeCount], sizeof(long)*edgeCansSize[edgeCount]*2, cudaMemcpyHostToDevice);
-            memset(effectBit,0,sizeof(long)*totalThreadNum/BITS);
-            cudaMalloc(&d_effectBit, sizeof(long)*totalThreadNum/BITS);
-            cudaMemcpy((void *)d_effectBit, (void *)effectBit, sizeof(long)*totalThreadNum/BITS, cudaMemcpyHostToDevice);
-
+            cudaMalloc(&d_effectBit, sizeof(int)*totalThreadNum);
+			cudaMemset(d_effectBit, 0, sizeof(int)*totalThreadNum);
             edgeMerge1<<<(totalThreadNum+MAXTHREADPERBLOCK-1)/MAXTHREADPERBLOCK,MAXTHREADPERBLOCK>>>(d_flagArray,
                     d_edgeCans,
                     edgeCansSize[edgeCount],
@@ -603,46 +621,68 @@ Match::match(IO& io)
                     totalThreadNum,
                     qsize,
                     d_effectBit);
+//
+			//************here are debug info
+			/*int *effectBit = new int [totalThreadNum];
+			cudaMemcpy((void *)effectBit,(void *)d_effectBit,sizeof(int)*totalThreadNum,cudaMemcpyDeviceToHost);
+			for (int ii = 0; ii < totalThreadNum; ii ++)
+				cout << effectBit[ii] << endl;
+			delete [] effectBit;*/
+			//************debug info done
+			thrust::inclusive_scan((thrust::device_ptr<int>)d_effectBit,(thrust::device_ptr<int>)(d_effectBit+totalThreadNum),(thrust::device_ptr<int>)d_effectBit);
+			//************here are debug info
+			/*int *debug = new int [totalThreadNum];
+			cudaMemcpy((void *)debug,(void *)d_effectBit,sizeof(int)*totalThreadNum,cudaMemcpyDeviceToHost);
+			for (int ii = 0; ii < totalThreadNum; ii ++)
+				cout << debug[ii] << endl;
+			delete [] debug;*/
+			//************debug info done
+			cudaMemcpy((void *)(&effectSize),(void *)(d_effectBit+totalThreadNum-1),sizeof(int),cudaMemcpyDeviceToHost);
+			//long *effectPos = new long [effectiveSize];
+			//memset(effectPos,0,sizeof(long)*effectiveSize);
+			long *d_effectPos;
+			cudaMalloc(&d_effectPos,sizeof(long)*effectSize);
+			cudaMemset(d_effectPos,0,sizeof(long)*effectSize);
 
-            cudaMemcpy((void *)effectBit, (void *)d_effectBit, sizeof(long)*totalThreadNum/BITS,cudaMemcpyDeviceToHost);
-            effectiveSize = 0;
-            //BETTER: finish this using scatter operation on GPU
-            for(long k = 0; k < totalThreadNum; k ++){
-                if(effectBit[k] != 0){
-                    effectBit[effectiveSize++] = k;
-                }
-            }
-
+			int maxBlockPerGrid = 64000;
+			int maxThreadPerBlock = 1024;
+			int maxThreadPerGrid = maxThreadPerBlock*maxBlockPerGrid;
+			long processedNum = 0;
+			while (processedNum < totalThreadNum) {
+				long remained  = totalThreadNum - processedNum;
+				int curThread = (remained > maxThreadPerGrid) ? maxThreadPerGrid : remained;
+				int curGridSize = (curThread + maxThreadPerBlock - 1)/maxThreadPerBlock;
+				getValidPos<<<curGridSize,maxThreadPerBlock>>>(d_effectBit,d_effectPos,processedNum,curThread);
+				processedNum += curThread;
+			}
+//
             cudaFree(d_effectBit);
-            cudaMalloc(&d_ansArea, sizeof(long)*effectiveSize*qsize);
-            cudaMalloc(&d_effectBit, sizeof(long)*effectiveSize);
-            cudaMemcpy((void *)d_effectBit, (void *)effectBit, sizeof(long)*effectiveSize, cudaMemcpyHostToDevice);
-            edgeMerge2<<<(effectiveSize+MAXTHREADPERBLOCK-1)/MAXTHREADPERBLOCK,MAXTHREADPERBLOCK>>>(d_flagArray,
+            cudaMalloc(&d_ansArea, sizeof(long)*effectSize*qsize);
+            edgeMerge2<<<(effectSize+MAXTHREADPERBLOCK-1)/MAXTHREADPERBLOCK,MAXTHREADPERBLOCK>>>(d_flagArray,
                     d_edgeCans,
                     edgeCansSize[edgeCount],
                     i,
                     query->inColOffset[j],
-                    effectiveSize,
+                    effectSize,
                     qsize,
-                    d_effectBit,
+                    d_effectPos,
                     d_ansArea);
             edgeCount ++;
-            printf("after edge %ld, the effective size is %ld\n", edgeCount, effectiveSize);
-            midResultNum = effectiveSize;
+            printf("after edge %ld, the effective size is %ld\n", edgeCount, effectSize);
+            midResultNum = effectSize;
             cudaFree(d_flagArray);
-            cudaFree(d_effectBit);
+            cudaFree(d_effectPos);
             cudaFree(d_edgeCans);
-            delete [] effectBit;
             d_flagArray = d_ansArea;
 
         }
     }
 
-    cout<<"to output result: "<<effectiveSize<<endl;
-    long* h_ansArea = new long [effectiveSize*qsize];
-    cudaMemcpy((void *)h_ansArea, (void *)d_ansArea, sizeof(long)*effectiveSize*qsize, cudaMemcpyDeviceToHost);
+    cout<<"to output result: "<<effectSize<<endl;
+    long* h_ansArea = new long [effectSize*qsize];
+    cudaMemcpy((void *)h_ansArea, (void *)d_ansArea, sizeof(long)*effectSize*qsize, cudaMemcpyDeviceToHost);
     cudaFree(d_ansArea);
-    for(long i = 0; i < effectiveSize; i ++)
+    for(long i = 0; i < effectSize; i ++)
     {
         long* tmpPtr = h_ansArea + qsize*i;
         io.output(tmpPtr, qsize);
