@@ -14,8 +14,8 @@
 #include "../graph/Graph.h"
 #include "../io/IO.h"
 #include <cuda_runtime.h>
-
-
+#include <thrust/scan.h>
+#include <thrust/device_ptr.h>
 class d_Match
 {
 public:
